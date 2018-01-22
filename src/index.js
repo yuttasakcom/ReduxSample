@@ -1,13 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { createStore } from 'redux'
+import { createStore, combineReducers, applyMiddleware } from 'redux'
+import { createLogger } from 'redux-logger'
 
 const initialState = {
   count: 0,
   lastCount: []
 }
 
-const reducers = (state = initialState, action) => {
+const counterReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'INC':
       return {
@@ -26,7 +27,18 @@ const reducers = (state = initialState, action) => {
   }
 }
 
-const store = createStore(reducers)
+const reducers = combineReducers({ counter: counterReducer })
+
+const myLogger = store => next => action => {
+  console.log('Logged Action: ', action.type)
+  next(action)
+}
+
+const store = createStore(
+  reducers,
+  {},
+  applyMiddleware(myLogger, createLogger())
+)
 
 store.subscribe(() => {
   console.log(store.getState())
